@@ -249,8 +249,14 @@ document.addEventListener('click', e => {
   tbl.querySelectorAll('th').forEach(t=>t.classList.remove('sort-asc','sort-desc'));
   th.classList.add(asc?'sort-desc':'sort-asc');
   rows.sort((a,b)=>{
-    const at=(a.querySelectorAll('td')[idx]?.innerText||'').trim().toLowerCase();
-    const bt=(b.querySelectorAll('td')[idx]?.innerText||'').trim().toLowerCase();
+    const at=(a.querySelectorAll('td')[idx]?.innerText||'').trim();
+    const bt=(b.querySelectorAll('td')[idx]?.innerText||'').trim();
+    // Try date parse first
+    const ad=new Date(at), bd=new Date(bt);
+    if(!isNaN(ad)&&!isNaN(bd)) return asc?(bd-ad):(ad-bd);
+    // Try numeric (strip $, commas)
+    const an=parseFloat(at.replace(/[$,]/g,'')), bn=parseFloat(bt.replace(/[$,]/g,''));
+    if(!isNaN(an)&&!isNaN(bn)) return asc?(bn-an):(an-bn);
     return asc?bt.localeCompare(at,undefined,{numeric:true}):at.localeCompare(bt,undefined,{numeric:true});
   });
   rows.forEach(r=>tbody.appendChild(r));
