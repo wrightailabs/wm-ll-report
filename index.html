@@ -15,8 +15,12 @@
     .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
     .container { max-width: 1000px; margin: 0 auto; padding: 32px 16px; }
+    .filter-bar { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+    .filter-btn { padding: 8px 20px; border-radius: 20px; border: 2px solid #1E2A5E; background: #fff; color: #1E2A5E; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+    .filter-btn:hover { background: #1E2A5E; color: #fff; }
+    .filter-btn.active { background: #1E2A5E; color: #fff; }
     .cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 24px; }
-    @media(max-width:600px) { .cards { grid-template-columns: 1fr 1fr; } }
+    @media(max-width:600px) { .cards { grid-template-columns: 1fr 1fr; } .filter-bar { justify-content: center; } }
     .card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.07); text-align: center; }
     .card .value { font-size: 32px; font-weight: 800; color: #1E2A5E; }
     .card .value.green { color: #16a34a; }
@@ -25,8 +29,7 @@
     table { width: 100%; border-collapse: collapse; }
     th { background: #f8fafc; padding: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; text-align: left; letter-spacing: 1px; cursor: pointer; user-select: none; }
     th:hover { background: #edf2f7; color: #1E2A5E; }
-    th.sort-asc::after { content: " ▲"; }
-    th.sort-desc::after { content: " ▼"; }
+    th.sort-asc::after { content: " ▲"; } th.sort-desc::after { content: " ▼"; }
     .footer { text-align: center; padding: 32px 16px; font-size: 12px; color: #94a3b8; }
     .note { background: #eff6ff; border-left: 4px solid #1E2A5E; border-radius: 0 8px 8px 0; padding: 14px 18px; margin-bottom: 24px; font-size: 13px; color: #1e3a5f; }
     #loading { background: #fff; border-radius: 12px; padding: 40px; text-align: center; color: #94a3b8; font-size: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
@@ -42,6 +45,12 @@
 </div>
 
 <div class="container">
+  <div class="filter-bar">
+    <button class="filter-btn" onclick="setFilter(7,this)">Last 7 Days</button>
+    <button class="filter-btn" onclick="setFilter(30,this)">Last 30 Days</button>
+    <button class="filter-btn" onclick="setFilter(90,this)">Last 90 Days</button>
+    <button class="filter-btn active" onclick="setFilter(0,this)">All Time</button>
+  </div>
   <div class="cards">
     <div class="card"><div class="value" id="stat-leads">—</div><div class="label">Total Leads</div></div>
     <div class="card"><div class="value" id="stat-won">—</div><div class="label">Won</div></div>
@@ -49,7 +58,7 @@
     <div class="card"><div class="value green" id="stat-revenue">—</div><div class="label">Total Revenue</div></div>
   </div>
   <div id="updated"></div>
-  <div class="note">&#128276; Live data from HousecallPro — refreshes automatically every hour. Customer names link directly to their HCP profile (must be logged in).</div>
+  <div class="note">&#128276; Live data from HousecallPro — refreshes every hour. Customer names link to HCP profiles (must be logged in). Filter buttons apply to appointment date.</div>
   <div id="loading">Loading lead data...</div>
   <div class="table-wrap" id="table-wrap" style="display:none;">
     <table>
@@ -64,72 +73,86 @@
     </table>
   </div>
 </div>
-
 <div class="footer">Wright AI Labs &mdash; Powered by Claire AI &nbsp;·&nbsp; Data sourced from HousecallPro &nbsp;·&nbsp; All times Eastern (ET)</div>
 
 <script>
-const BADGE = {
-  'Won': '#16a34a',
-  'Scheduled': '#1E2A5E',
-  'In Progress': '#0891b2',
-  'Canceled': '#dc2626',
-  'Needs Scheduling': '#d97706'
-};
+const BADGE = { 'Won':'#16a34a','Scheduled':'#1E2A5E','In Progress':'#0891b2','Canceled':'#dc2626','Needs Scheduling':'#d97706' };
+let allLeads = [];
+let activeDays = 0;
+
+function fmt(n) { return '$' + n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+
+function setFilter(days, btn) {
+  activeDays = days;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable(allLeads, days);
+}
+
+function filterLeads(leads, days) {
+  if (!days) return leads;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  return leads.filter(l => {
+    const d = l.appt_date || l.created;
+    if (!d) return false;
+    return new Date(d) >= cutoff;
+  });
+}
+
+function renderTable(leads, days) {
+  const filtered = filterLeads(leads, days);
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  filtered.forEach(l => {
+    const hcp = l.customer_id ? `https://pro.housecallpro.com/app/customers/${l.customer_id}` : null;
+    const nameCell = hcp
+      ? `<a href="${hcp}" target="_blank" style="color:#1E2A5E;font-weight:600;text-decoration:underline;">${l.name}</a><br><span style="font-size:11px;color:#94a3b8;">${l.phone}</span>`
+      : `<span style="font-weight:600;">${l.name}</span>`;
+    const badge = BADGE[l.outcome] || '#94a3b8';
+    const closed = l.closed_value > 0 ? fmt(l.closed_value) : '—';
+    const est = l.est_value > 0 ? fmt(l.est_value) : '—';
+    const tr = document.createElement('tr');
+    tr.style.borderBottom = '1px solid #f1f5f9';
+    tr.innerHTML = `
+      <td style="padding:10px 12px;font-size:13px;">${nameCell}</td>
+      <td style="padding:10px 12px;"><span style="background:${badge};color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">${l.outcome}</span></td>
+      <td style="padding:10px 12px;font-size:13px;color:#334155;">${l.appt_date||'—'}</td>
+      <td style="padding:10px 12px;font-size:13px;color:#334155;">${est}</td>
+      <td style="padding:10px 12px;font-size:13px;font-weight:700;color:#16a34a;">${closed}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('stat-leads').textContent = filtered.length;
+  document.getElementById('stat-won').textContent = filtered.filter(l=>l.outcome==='Won').length;
+  document.getElementById('stat-sched').textContent = filtered.filter(l=>l.outcome==='Scheduled').length;
+  const rev = filtered.reduce((s,l)=>s+l.closed_value,0);
+  document.getElementById('stat-revenue').textContent = fmt(rev);
+}
 
 fetch('https://3-18-36-246.sslip.io/ll-report')
   .then(r => r.json())
   .then(d => {
-    if (d.status === 'building') {
-      document.getElementById('loading').textContent = 'Report is being built — check back in 60 seconds.';
-      return;
-    }
-    document.getElementById('stat-leads').textContent = d.total_leads;
-    document.getElementById('stat-won').textContent = d.won;
-    document.getElementById('stat-sched').textContent = d.scheduled;
-    document.getElementById('stat-revenue').textContent = '$' + d.total_revenue.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+    if (d.status === 'building') { document.getElementById('loading').textContent = 'Report is being built — check back in 60 seconds.'; return; }
+    allLeads = d.leads;
     document.getElementById('updated').textContent = 'Last updated: ' + d.updated;
-
-    const tbody = document.getElementById('tbody');
-    d.leads.forEach(l => {
-      const hcp = l.customer_id ? `https://pro.housecallpro.com/app/customers/${l.customer_id}` : null;
-      const nameCell = hcp
-        ? `<a href="${hcp}" target="_blank" style="color:#1E2A5E;font-weight:600;text-decoration:underline;">${l.name}</a><br><span style="font-size:11px;color:#94a3b8;">${l.phone}</span>`
-        : `<span style="font-weight:600;">${l.name}</span>`;
-      const badge = BADGE[l.outcome] || '#94a3b8';
-      const closed = l.closed_value > 0 ? '$' + l.closed_value.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0}) : '—';
-      const est = l.est_value > 0 ? '$' + l.est_value.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0}) : '—';
-      const appt = l.appt_date || '—';
-      const tr = document.createElement('tr');
-      tr.style.borderBottom = '1px solid #f1f5f9';
-      tr.innerHTML = `
-        <td style="padding:10px 12px;font-size:13px;">${nameCell}</td>
-        <td style="padding:10px 12px;"><span style="background:${badge};color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">${l.outcome}</span></td>
-        <td style="padding:10px 12px;font-size:13px;color:#334155;">${appt}</td>
-        <td style="padding:10px 12px;font-size:13px;color:#334155;">${est}</td>
-        <td style="padding:10px 12px;font-size:13px;font-weight:700;color:#16a34a;">${closed}</td>`;
-      tbody.appendChild(tr);
-    });
-
     document.getElementById('loading').style.display = 'none';
     document.getElementById('table-wrap').style.display = 'block';
+    renderTable(allLeads, 0);
   })
-  .catch(() => {
-    document.getElementById('loading').textContent = 'Unable to load data — please try again shortly.';
-  });
+  .catch(() => { document.getElementById('loading').textContent = 'Unable to load data — please try again shortly.'; });
 
 document.addEventListener('click', e => {
   const th = e.target.closest('th');
   if (!th) return;
-  const table = th.closest('table');
-  const tbody = table.querySelector('tbody');
+  const tbody = th.closest('table').querySelector('tbody');
   const rows = Array.from(tbody.querySelectorAll('tr'));
   const idx = Array.from(th.parentElement.children).indexOf(th);
   const asc = th.classList.contains('sort-asc');
   document.querySelectorAll('th').forEach(t => t.classList.remove('sort-asc','sort-desc'));
   th.classList.add(asc ? 'sort-desc' : 'sort-asc');
   rows.sort((a,b) => {
-    const at = (a.querySelectorAll('td')[idx]?.innerText||'').trim().toLowerCase();
-    const bt = (b.querySelectorAll('td')[idx]?.innerText||'').trim().toLowerCase();
+    const at=(a.querySelectorAll('td')[idx]?.innerText||'').trim().toLowerCase();
+    const bt=(b.querySelectorAll('td')[idx]?.innerText||'').trim().toLowerCase();
     return asc ? bt.localeCompare(at,undefined,{numeric:true}) : at.localeCompare(bt,undefined,{numeric:true});
   });
   rows.forEach(r => tbody.appendChild(r));
