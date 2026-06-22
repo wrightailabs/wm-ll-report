@@ -70,13 +70,13 @@
   <div class="funnel">
     <div class="funnel-card">
       <div class="icon">📢</div>
-      <div class="value">1,564</div>
-      <div class="label">Total Leads Generated</div>
-      <div class="pct">All opt-ins via Local Leap ads</div>
+      <div class="value">790</div>
+      <div class="label">Total Leads</div>
+      <div class="pct">Qualified leads since Sept 2025</div>
     </div>
     <div class="funnel-card">
       <div class="icon">📅</div>
-      <div class="value">577</div>
+      <div class="value">290</div>
       <div class="label">Appointments Booked</div>
       <div class="pct">37% appointment rate</div>
     </div>
@@ -228,7 +228,7 @@ fetch('https://3-18-36-246.sslip.io/ll-report')
     if(d.status==='building'){document.getElementById('loading').textContent='Report is being built — check back in 60 seconds.';return;}
     allLeads=d.leads;
     document.getElementById('stat-won').textContent=d.won;
-    document.getElementById('stat-won-pct').textContent=Math.round(d.won/577*100)+'% of appointments';
+    document.getElementById('stat-won-pct').textContent=Math.round(d.won/290*100)+'% of appointments';
     document.getElementById('stat-revenue').textContent=fmt(d.total_revenue);
     document.getElementById('updated').textContent='HCP data last updated: '+d.updated;
     document.getElementById('loading').style.display='none';
