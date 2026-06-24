@@ -55,7 +55,9 @@
 
     /* Monthly table */
     .section-title { font-size: 14px; font-weight: 800; color: #1E2A5E; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; margin-top: 28px; }
-    .table-wrap { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.07); overflow-x: auto; margin-bottom: 8px; }
+    .table-wrap { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.07); overflow-x: auto; margin-bottom: 8px; -webkit-overflow-scrolling: touch; }
+    .scroll-hint { font-size: 11px; color: #94a3b8; text-align: right; margin-bottom: 4px; }
+    @media(max-width:640px) { .hide-mobile { display: none; } }
     table { width: 100%; border-collapse: collapse; }
     th { background: #f8fafc; padding: 11px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; text-align: left; letter-spacing: 1px; cursor: pointer; user-select: none; }
     th:hover { background: #edf2f7; color: #1E2A5E; }
@@ -126,14 +128,15 @@
 
   <!-- MONTHLY BREAKDOWN -->
   <div class="section-title">Monthly Performance</div>
+  <div class="scroll-hint">← Scroll to see Won Jobs & Revenue →</div>
   <div class="table-wrap">
     <table id="monthly-table">
       <thead><tr>
         <th>Month</th>
         <th>Ad Spend</th>
-        <th>Leads</th>
-        <th>Appts</th>
-        <th>Appt Rate</th>
+        <th class="hide-mobile">Leads</th>
+        <th class="hide-mobile">Appts</th>
+        <th class="hide-mobile">Appt Rate</th>
         <th>Won Jobs</th>
         <th>Revenue</th>
         <th>ROI</th>
@@ -231,9 +234,9 @@ function buildMonthlyTable(wonLeads) {
     tr.innerHTML=`
       <td style="font-weight:700;">${m.month}</td>
       <td>$${m.spend.toLocaleString()}</td>
-      <td><div class="bar-cell"><div class="bar" style="width:${lw}px"></div>${m.leads}</div></td>
-      <td><div class="bar-cell"><div class="bar green" style="width:${aw}px"></div>${m.appts}</div></td>
-      <td>${apptRate}</td>
+      <td class="hide-mobile"><div class="bar-cell"><div class="bar" style="width:${lw}px"></div>${m.leads}</div></td>
+      <td class="hide-mobile"><div class="bar-cell"><div class="bar green" style="width:${aw}px"></div>${m.appts}</div></td>
+      <td class="hide-mobile">${apptRate}</td>
       <td style="font-weight:700;color:#1E2A5E;">${won>0?won:'—'}</td>
       <td style="font-weight:700;color:#16a34a;">${rev>0?fmt(rev):'—'}</td>
       <td style="font-weight:800;color:${rev>0?roiColor:'#94a3b8'};">${rev>0?roi:'—'}</td>`;
@@ -242,7 +245,7 @@ function buildMonthlyTable(wonLeads) {
   const tot=document.createElement('tr');
   tot.style.fontWeight='800'; tot.style.background='#f0fdf4';
   const totalRoi = totalSpend>0?(totalRev/totalSpend).toFixed(1)+'x':'—';
-  tot.innerHTML=`<td>TOTAL</td><td>$${totalSpend.toLocaleString()}</td><td>${totalLeads}</td><td>${totalAppts}</td><td>${(totalAppts/totalLeads*100).toFixed(0)}%</td><td style="color:#1E2A5E;">${totalWon}</td><td style="color:#16a34a;">${fmt(totalRev)}</td><td style="color:#16a34a;">${totalRoi}</td>`;
+  tot.innerHTML=`<td>TOTAL</td><td>$${totalSpend.toLocaleString()}</td><td class="hide-mobile">${totalLeads}</td><td class="hide-mobile">${totalAppts}</td><td class="hide-mobile">${(totalAppts/totalLeads*100).toFixed(0)}%</td><td style="color:#1E2A5E;">${totalWon}</td><td style="color:#16a34a;">${fmt(totalRev)}</td><td style="color:#16a34a;">${totalRoi}</td>`;
   tbody.appendChild(tot);
 }
 
