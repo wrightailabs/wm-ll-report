@@ -17,25 +17,45 @@
     .container { max-width: 1040px; margin: 0 auto; padding: 32px 16px; }
 
     /* Funnel */
-    .funnel { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 28px; }
+    .funnel { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 8px; }
     @media(max-width:600px) { .funnel { grid-template-columns: 1fr 1fr; } }
-    .funnel-card { background: #fff; border-radius: 12px; padding: 20px 16px; box-shadow: 0 1px 4px rgba(0,0,0,.07); text-align: center; position: relative; }
+    .funnel-card { background: #fff; border-radius: 12px; padding: 20px 16px; box-shadow: 0 1px 4px rgba(0,0,0,.07); text-align: center; position: relative; cursor: pointer; transition: all 0.15s; border: 2px solid transparent; }
+    .funnel-card:hover { box-shadow: 0 4px 16px rgba(30,42,94,0.15); transform: translateY(-2px); border-color: #1E2A5E22; }
+    .funnel-card.active { border-color: #1E2A5E; box-shadow: 0 4px 16px rgba(30,42,94,0.2); }
     .funnel-card .icon { font-size: 22px; margin-bottom: 6px; }
     .funnel-card .value { font-size: 30px; font-weight: 800; color: #1E2A5E; }
     .funnel-card .value.green { color: #16a34a; }
     .funnel-card .label { font-size: 12px; color: #64748b; margin-top: 4px; font-weight: 600; }
     .funnel-card .pct { font-size: 11px; color: #94a3b8; margin-top: 4px; }
-    .funnel-arrow { display: flex; align-items: center; justify-content: center; font-size: 20px; color: #cbd5e1; padding-top: 28px; }
-    @media(max-width:600px) { .funnel-arrow { display: none; } }
+    .funnel-card .drill-hint { font-size: 10px; color: #1E2A5E; margin-top: 8px; font-weight: 700; opacity: 0.6; }
+    .funnel-card:hover .drill-hint { opacity: 1; }
+
+    /* Drill-down panel */
+    .drill-panel { background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(30,42,94,0.12); margin-bottom: 24px; overflow: hidden; display: none; border-top: 3px solid #1E2A5E; }
+    .drill-panel.open { display: block; }
+    .drill-header { background: #f8fafc; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; }
+    .drill-header h3 { font-size: 14px; font-weight: 800; color: #1E2A5E; }
+    .drill-close { background: none; border: none; font-size: 18px; cursor: pointer; color: #94a3b8; padding: 0 4px; }
+    .drill-close:hover { color: #1E2A5E; }
+    .drill-body { padding: 16px 20px; }
+    .drill-body table { width: 100%; border-collapse: collapse; }
+    .drill-body th { background: #f8fafc; padding: 8px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    .drill-body td { padding: 9px 12px; font-size: 13px; color: #334155; border-bottom: 1px solid #f8fafc; }
+    .drill-body tr:last-child td { border-bottom: none; }
+    .drill-empty { padding: 24px; text-align: center; color: #94a3b8; font-size: 13px; }
+    .drill-summary { display: flex; gap: 24px; padding: 12px 0 16px; }
+    .drill-summary .ds { text-align: center; }
+    .drill-summary .ds .dv { font-size: 22px; font-weight: 800; color: #1E2A5E; }
+    .drill-summary .ds .dl { font-size: 11px; color: #94a3b8; }
 
     /* Filter bar */
-    .filter-bar { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
-    .filter-btn { padding: 8px 20px; border-radius: 20px; border: 2px solid #1E2A5E; background: #fff; color: #1E2A5E; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+    .filter-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-btn { padding: 7px 18px; border-radius: 20px; border: 2px solid #1E2A5E; background: #fff; color: #1E2A5E; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
     .filter-btn:hover, .filter-btn.active { background: #1E2A5E; color: #fff; }
 
     /* Monthly table */
-    .section-title { font-size: 14px; font-weight: 800; color: #1E2A5E; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
-    .table-wrap { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.07); overflow-x: auto; margin-bottom: 28px; }
+    .section-title { font-size: 14px; font-weight: 800; color: #1E2A5E; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; margin-top: 28px; }
+    .table-wrap { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.07); overflow-x: auto; margin-bottom: 8px; }
     table { width: 100%; border-collapse: collapse; }
     th { background: #f8fafc; padding: 11px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; text-align: left; letter-spacing: 1px; cursor: pointer; user-select: none; }
     th:hover { background: #edf2f7; color: #1E2A5E; }
@@ -45,14 +65,11 @@
     .bar-cell { display: flex; align-items: center; gap: 8px; }
     .bar { height: 8px; border-radius: 4px; background: #1E2A5E; min-width: 2px; }
     .bar.green { background: #16a34a; }
-
-    .note { background: #eff6ff; border-left: 4px solid #1E2A5E; border-radius: 0 8px 8px 0; padding: 14px 18px; margin-bottom: 24px; font-size: 13px; color: #1e3a5f; }
+    .note { background: #eff6ff; border-left: 4px solid #1E2A5E; border-radius: 0 8px 8px 0; padding: 14px 18px; margin-bottom: 20px; font-size: 13px; color: #1e3a5f; }
     #loading { background: #fff; border-radius: 12px; padding: 40px; text-align: center; color: #94a3b8; font-size: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
-    #updated { font-size: 11px; color: #94a3b8; margin-bottom: 16px; }
+    #updated { font-size: 11px; color: #94a3b8; margin-bottom: 12px; }
     .footer { text-align: center; padding: 32px 16px; font-size: 12px; color: #94a3b8; }
     .won-badge { background: #16a34a; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
-    .sched-badge { background: #1E2A5E; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
-    .other-badge { color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
   </style>
 </head>
 <body>
@@ -68,30 +85,43 @@
 
   <!-- FUNNEL CARDS -->
   <div class="funnel">
-    <div class="funnel-card">
+    <div class="funnel-card" id="card-leads" onclick="drillDown('leads')">
       <div class="icon">📢</div>
       <div class="value">790</div>
       <div class="label">Total Leads</div>
       <div class="pct">Qualified leads since Sept 2025</div>
+      <div class="drill-hint">▼ Tap to drill down</div>
     </div>
-    <div class="funnel-card">
+    <div class="funnel-card" id="card-appts" onclick="drillDown('appts')">
       <div class="icon">📅</div>
       <div class="value">290</div>
       <div class="label">Appointments Booked</div>
       <div class="pct">37% appointment rate</div>
+      <div class="drill-hint">▼ Tap to drill down</div>
     </div>
-    <div class="funnel-card">
+    <div class="funnel-card" id="card-won" onclick="drillDown('won')">
       <div class="icon">✅</div>
       <div class="value" id="stat-won">—</div>
       <div class="label">Won Jobs (HCP)</div>
-      <div class="pct" id="stat-won-pct">—</div>
+      <div class="pct" id="stat-won-pct">Loading...</div>
+      <div class="drill-hint">▼ Tap to drill down</div>
     </div>
-    <div class="funnel-card">
+    <div class="funnel-card" id="card-revenue" onclick="drillDown('revenue')">
       <div class="icon">💰</div>
       <div class="value green" id="stat-revenue">—</div>
       <div class="label">Total Revenue</div>
-      <div class="pct">From tagged HCP jobs</div>
+      <div class="pct">From verified HCP jobs</div>
+      <div class="drill-hint">▼ Tap to drill down</div>
     </div>
+  </div>
+
+  <!-- DRILL-DOWN PANEL -->
+  <div class="drill-panel" id="drill-panel">
+    <div class="drill-header">
+      <h3 id="drill-title">Detail</h3>
+      <button class="drill-close" onclick="closeDrill()">✕</button>
+    </div>
+    <div class="drill-body" id="drill-body"></div>
   </div>
 
   <!-- MONTHLY BREAKDOWN -->
@@ -120,15 +150,14 @@
     <button class="filter-btn active" onclick="setFilter(0,this)">All Time</button>
   </div>
   <div id="updated"></div>
-  <div class="note">&#128276; Live won-job data pulled from HousecallPro. Customer names link to HCP profiles (must be logged in). Monthly performance data from Local Leap's KPI tracker.</div>
-  <div id="loading">Loading won job data...</div>
+  <div class="note">📌 Live won-job data pulled from HousecallPro. Customer names link to HCP profiles. Monthly data from Local Leap's KPI tracker.</div>
+  <div id="loading">Loading HCP data...</div>
   <div class="table-wrap" id="table-wrap" style="display:none;">
     <table>
       <thead><tr>
         <th>Lead Name</th>
         <th>Status</th>
         <th>Appointment Date</th>
-        <th>Estimated Value</th>
         <th>Closed Value</th>
       </tr></thead>
       <tbody id="tbody"></tbody>
@@ -136,21 +165,20 @@
   </div>
 </div>
 
-<div class="footer">Wright AI Labs &mdash; Powered by Claire AI &nbsp;·&nbsp; HCP data live &nbsp;·&nbsp; Monthly KPI data from Local Leap Media &nbsp;·&nbsp; All times Eastern (ET)</div>
+<div class="footer">Wright AI Labs &mdash; Powered by Claire AI &nbsp;·&nbsp; HCP data live &nbsp;·&nbsp; Monthly KPI data from Local Leap Media</div>
 
 <script>
-// Monthly data from Local Leap KPI tracker
 const MONTHLY = [
-  {"month":"September '25","spend":550,"leads":12,"appts":4},
-  {"month":"October '25","spend":4940,"leads":159,"appts":56},
-  {"month":"November '25","spend":6100,"leads":156,"appts":52},
-  {"month":"December '25","spend":6037,"leads":102,"appts":31},
-  {"month":"January '26","spend":7069,"leads":176,"appts":44},
-  {"month":"February '26","spend":6667,"leads":194,"appts":86},
-  {"month":"March '26","spend":8717,"leads":199,"appts":68},
-  {"month":"April '26","spend":7191,"leads":220,"appts":84},
-  {"month":"May '26","spend":8598,"leads":138,"appts":74},
-  {"month":"June '26","spend":6842,"leads":208,"appts":78}
+  {month:"September '25",spend:550,leads:12,appts:4},
+  {month:"October '25",spend:4940,leads:159,appts:56},
+  {month:"November '25",spend:6100,leads:156,appts:52},
+  {month:"December '25",spend:6037,leads:102,appts:31},
+  {month:"January '26",spend:7069,leads:176,appts:44},
+  {month:"February '26",spend:6667,leads:194,appts:86},
+  {month:"March '26",spend:8717,leads:199,appts:68},
+  {month:"April '26",spend:7191,leads:220,appts:84},
+  {month:"May '26",spend:8598,leads:138,appts:74},
+  {month:"June '26",spend:6842,leads:208,appts:78}
 ];
 
 const maxLeads = Math.max(...MONTHLY.map(m=>m.leads));
@@ -159,34 +187,84 @@ const tbody = document.getElementById('monthly-tbody');
 let totalSpend=0, totalLeads=0, totalAppts=0;
 MONTHLY.forEach(m => {
   totalSpend+=m.spend; totalLeads+=m.leads; totalAppts+=m.appts;
-  const apptRate = m.leads>0 ? (m.appts/m.leads*100).toFixed(0)+'%' : '—';
-  const cpl = m.leads>0 ? '$'+(m.spend/m.leads).toFixed(2) : '—';
-  const cpa = m.appts>0 ? '$'+(m.spend/m.appts).toFixed(2) : '—';
-  const lw = Math.round(m.leads/maxLeads*80);
-  const aw = Math.round(m.appts/maxAppts*80);
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
-    <td style="font-weight:700;">${m.month}</td>
-    <td>$${m.spend.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}</td>
-    <td><div class="bar-cell"><div class="bar" style="width:${lw}px"></div>${m.leads}</div></td>
-    <td><div class="bar-cell"><div class="bar green" style="width:${aw}px"></div>${m.appts}</div></td>
-    <td>${apptRate}</td>
-    <td>${cpl}</td>
-    <td>${cpa}</td>`;
+  const apptRate=m.leads>0?(m.appts/m.leads*100).toFixed(0)+'%':'—';
+  const cpl=m.leads>0?'$'+(m.spend/m.leads).toFixed(2):'—';
+  const cpa=m.appts>0?'$'+(m.spend/m.appts).toFixed(2):'—';
+  const lw=Math.round(m.leads/maxLeads*80);
+  const aw=Math.round(m.appts/maxAppts*80);
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td style="font-weight:700;">${m.month}</td><td>$${m.spend.toLocaleString()}</td><td><div class="bar-cell"><div class="bar" style="width:${lw}px"></div>${m.leads}</div></td><td><div class="bar-cell"><div class="bar green" style="width:${aw}px"></div>${m.appts}</div></td><td>${apptRate}</td><td>${cpl}</td><td>${cpa}</td>`;
   tbody.appendChild(tr);
 });
-// Totals row
-const tot = document.createElement('tr');
+const tot=document.createElement('tr');
 tot.style.fontWeight='700'; tot.style.background='#f8fafc';
-tot.innerHTML = `<td>TOTAL</td><td>$${totalSpend.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}</td><td>${totalLeads}</td><td>${totalAppts}</td><td>${(totalAppts/totalLeads*100).toFixed(0)}%</td><td>$${(totalSpend/totalLeads).toFixed(2)}</td><td>$${(totalSpend/totalAppts).toFixed(2)}</td>`;
+tot.innerHTML=`<td>TOTAL</td><td>$${totalSpend.toLocaleString()}</td><td>${totalLeads}</td><td>${totalAppts}</td><td>${(totalAppts/totalLeads*100).toFixed(0)}%</td><td>$${(totalSpend/totalLeads).toFixed(2)}</td><td>$${(totalSpend/totalAppts).toFixed(2)}</td>`;
 tbody.appendChild(tot);
 
-// Live HCP data
-const BADGE = { 'Won':'#16a34a','Scheduled':'#1E2A5E','In Progress':'#0891b2','Canceled':'#dc2626','Needs Scheduling':'#d97706' };
-let allLeads = [];
-let activeDays = 0;
+const BADGE={'Won':'#16a34a','Scheduled':'#1E2A5E','In Progress':'#0891b2','Canceled':'#dc2626','Needs Scheduling':'#d97706'};
+let allLeads=[], activeDays=0, liveData=null;
+function fmt(n){return '$'+n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});}
 
-function fmt(n) { return '$' + n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+// Drill-down
+let activeCard = null;
+function drillDown(type) {
+  const panel = document.getElementById('drill-panel');
+  const title = document.getElementById('drill-title');
+  const body = document.getElementById('drill-body');
+
+  // Toggle off if same card
+  if (activeCard === type) { closeDrill(); return; }
+  activeCard = type;
+
+  document.querySelectorAll('.funnel-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('card-' + (type==='revenue'?'revenue':type==='won'?'won':type==='appts'?'appts':'leads')).classList.add('active');
+
+  panel.classList.add('open');
+  panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+
+  if (type === 'leads') {
+    title.textContent = '790 Total Leads — Monthly Breakdown';
+    let rows = MONTHLY.map(m => `<tr><td style="font-weight:700;">${m.month}</td><td>${m.leads}</td><td>$${(m.spend/m.leads).toFixed(2)}</td></tr>`).join('');
+    body.innerHTML = `<table><thead><tr><th>Month</th><th>Leads</th><th>Cost / Lead</th></tr></thead><tbody>${rows}</tbody></table>`;
+  } else if (type === 'appts') {
+    title.textContent = '290 Appointments — Monthly Breakdown';
+    let rows = MONTHLY.map(m => `<tr><td style="font-weight:700;">${m.month}</td><td>${m.appts}</td><td>${(m.appts/m.leads*100).toFixed(0)}%</td><td>$${(m.spend/m.appts).toFixed(2)}</td></tr>`).join('');
+    body.innerHTML = `<table><thead><tr><th>Month</th><th>Appointments</th><th>Appt Rate</th><th>Cost / Appt</th></tr></thead><tbody>${rows}</tbody></table>`;
+  } else if (type === 'won' || type === 'revenue') {
+    if (!liveData) {
+      title.textContent = type === 'won' ? 'Won Jobs — Detail' : 'Revenue — Breakdown by Customer';
+      body.innerHTML = '<div class="drill-empty">Loading HCP data...</div>';
+      return;
+    }
+    const won = allLeads.filter(l => l.outcome === 'Won');
+    if (type === 'won') {
+      title.textContent = `Won Jobs (${won.length}) — HCP Detail`;
+      const rows = won.map(l => {
+        const hcp = l.customer_id ? `https://pro.housecallpro.com/app/customers/${l.customer_id}` : null;
+        const name = hcp ? `<a href="${hcp}" target="_blank" style="color:#1E2A5E;font-weight:600;text-decoration:underline;">${l.name}</a>` : l.name;
+        return `<tr><td>${name}</td><td>${l.appt_date||'—'}</td><td style="font-weight:700;color:#16a34a;">${l.closed_value>0?fmt(l.closed_value):'—'}</td></tr>`;
+      }).join('');
+      body.innerHTML = `<table><thead><tr><th>Customer</th><th>Appointment Date</th><th>Closed Value</th></tr></thead><tbody>${rows}</tbody></table>`;
+    } else {
+      title.textContent = `Revenue Breakdown — Top Customers`;
+      const sorted = [...won].sort((a,b)=>b.closed_value-a.closed_value);
+      const total = sorted.reduce((s,l)=>s+l.closed_value,0);
+      const rows = sorted.map((l,i) => {
+        const hcp = l.customer_id ? `https://pro.housecallpro.com/app/customers/${l.customer_id}` : null;
+        const name = hcp ? `<a href="${hcp}" target="_blank" style="color:#1E2A5E;font-weight:600;text-decoration:underline;">${l.name}</a>` : l.name;
+        const pct = total>0?(l.closed_value/total*100).toFixed(1)+'%':'—';
+        return `<tr><td style="color:#94a3b8;font-size:11px;">${i+1}</td><td>${name}</td><td style="font-weight:700;color:#16a34a;">${fmt(l.closed_value)}</td><td style="color:#64748b;">${pct}</td></tr>`;
+      }).join('');
+      body.innerHTML = `<div style="padding:8px 0 16px;font-size:13px;color:#64748b;">Total verified revenue: <strong style="color:#16a34a;">${fmt(total)}</strong> across <strong>${won.length}</strong> customers</div><table><thead><tr><th>#</th><th>Customer</th><th>Revenue</th><th>% of Total</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+  }
+}
+
+function closeDrill() {
+  activeCard = null;
+  document.getElementById('drill-panel').classList.remove('open');
+  document.querySelectorAll('.funnel-card').forEach(c => c.classList.remove('active'));
+}
 
 function setFilter(days, btn) {
   activeDays = days;
@@ -207,17 +285,10 @@ function renderLeads(leads, days) {
   tbody.innerHTML = '';
   filtered.forEach(l => {
     const hcp = l.customer_id ? `https://pro.housecallpro.com/app/customers/${l.customer_id}` : null;
-    const nameCell = hcp
-      ? `<a href="${hcp}" target="_blank" style="color:#1E2A5E;font-weight:600;text-decoration:underline;">${l.name}</a><br><span style="font-size:11px;color:#94a3b8;">${l.phone}</span>`
-      : `<span style="font-weight:600;">${l.name}</span>`;
+    const nameCell = hcp ? `<a href="${hcp}" target="_blank" style="color:#1E2A5E;font-weight:600;text-decoration:underline;">${l.name}</a><br><span style="font-size:11px;color:#94a3b8;">${l.phone}</span>` : `<span style="font-weight:600;">${l.name}</span>`;
     const badge = BADGE[l.outcome]||'#94a3b8';
     const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${nameCell}</td>
-      <td><span style="background:${badge};color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">${l.outcome}</span></td>
-      <td>${l.appt_date||'—'}</td>
-      <td>${l.est_value>0?fmt(l.est_value):'—'}</td>
-      <td style="font-weight:700;color:#16a34a;">${l.closed_value>0?fmt(l.closed_value):'—'}</td>`;
+    tr.innerHTML = `<td>${nameCell}</td><td><span style="background:${badge};color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">${l.outcome}</span></td><td>${l.appt_date||'—'}</td><td style="font-weight:700;color:#16a34a;">${l.closed_value>0?fmt(l.closed_value):'—'}</td>`;
     tbody.appendChild(tr);
   });
 }
@@ -226,17 +297,21 @@ fetch('https://3-18-36-246.sslip.io/ll-report')
   .then(r=>r.json())
   .then(d=>{
     if(d.status==='building'){document.getElementById('loading').textContent='Report is being built — check back in 60 seconds.';return;}
-    allLeads=d.leads;
-    document.getElementById('stat-won').textContent=d.won;
-    document.getElementById('stat-won-pct').textContent=Math.round(d.won/290*100)+'% of appointments';
-    document.getElementById('stat-revenue').textContent=fmt(d.total_revenue);
-    document.getElementById('updated').textContent='HCP data last updated: '+d.updated;
+    liveData = d;
+    allLeads = d.leads||[];
+    document.getElementById('stat-won').textContent = d.won||'—';
+    document.getElementById('stat-won-pct').textContent = d.won ? Math.round(d.won/290*100)+'% of appointments' : '';
+    document.getElementById('stat-revenue').textContent = d.total_revenue ? fmt(d.total_revenue) : '—';
+    document.getElementById('updated').textContent = 'HCP data last updated: '+(d.updated||'');
     document.getElementById('loading').style.display='none';
     document.getElementById('table-wrap').style.display='block';
-    renderLeads(allLeads,0);
+    renderLeads(allLeads, 0);
+    // If drill panel was open waiting for data, refresh it
+    if (activeCard === 'won' || activeCard === 'revenue') drillDown(activeCard);
   })
   .catch(()=>{document.getElementById('loading').textContent='Unable to load HCP data — please try again shortly.';});
 
+// Column sort
 document.addEventListener('click', e => {
   const th = e.target.closest('th');
   if(!th) return;
@@ -251,10 +326,8 @@ document.addEventListener('click', e => {
   rows.sort((a,b)=>{
     const at=(a.querySelectorAll('td')[idx]?.innerText||'').trim();
     const bt=(b.querySelectorAll('td')[idx]?.innerText||'').trim();
-    // Try date parse first
     const ad=new Date(at), bd=new Date(bt);
-    if(!isNaN(ad)&&!isNaN(bd)) return asc?(bd-ad):(ad-bd);
-    // Try numeric (strip $, commas)
+    if(!isNaN(ad)&&!isNaN(bd)&&at.includes('-')) return asc?(bd-ad):(ad-bd);
     const an=parseFloat(at.replace(/[$,]/g,'')), bn=parseFloat(bt.replace(/[$,]/g,''));
     if(!isNaN(an)&&!isNaN(bn)) return asc?(bn-an):(an-bn);
     return asc?bt.localeCompare(at,undefined,{numeric:true}):at.localeCompare(bt,undefined,{numeric:true});
