@@ -149,6 +149,12 @@
     <button class="filter-btn" onclick="setFilter(90,this)">Last 90 Days</button>
     <button class="filter-btn active" onclick="setFilter(0,this)">All Time</button>
   </div>
+  <div id="filter-totals" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 18px;margin-bottom:12px;display:none;">
+    <span style="font-size:13px;color:#64748b;font-weight:600;">Showing: </span>
+    <span id="filter-count" style="font-size:14px;font-weight:800;color:#1E2A5E;"></span>
+    <span style="font-size:13px;color:#64748b;font-weight:600;margin-left:16px;">Total Revenue: </span>
+    <span id="filter-revenue" style="font-size:14px;font-weight:800;color:#16a34a;"></span>
+  </div>
   <div id="updated"></div>
   <div class="note">📌 Live won-job data pulled from HousecallPro. Customer names link to HCP profiles. Monthly data from Local Leap's KPI tracker.</div>
   <div id="loading">Loading HCP data...</div>
@@ -281,6 +287,13 @@ function filterLeads(leads, days) {
 
 function renderLeads(leads, days) {
   const filtered = filterLeads(leads, days);
+  // Show totals bar
+  const wonFiltered = filtered.filter(l => l.outcome === 'Won');
+  const totalRev = wonFiltered.reduce((s,l) => s+l.closed_value, 0);
+  const label = days ? `Last ${days} Days` : 'All Time';
+  document.getElementById('filter-totals').style.display = 'block';
+  document.getElementById('filter-count').textContent = `${wonFiltered.length} won jobs (${label})`;
+  document.getElementById('filter-revenue').textContent = fmt(totalRev);
   const tbody = document.getElementById('tbody');
   tbody.innerHTML = '';
   filtered.forEach(l => {
