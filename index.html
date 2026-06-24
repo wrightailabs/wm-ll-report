@@ -132,10 +132,11 @@
         <th>Month</th>
         <th>Ad Spend</th>
         <th>Leads</th>
-        <th>Appointments</th>
+        <th>Appts</th>
         <th>Appt Rate</th>
-        <th>Cost / Lead</th>
-        <th>Cost / Appt</th>
+        <th>Won Jobs</th>
+        <th>Revenue</th>
+        <th>ROI</th>
       </tr></thead>
       <tbody id="monthly-tbody"></tbody>
     </table>
@@ -189,23 +190,63 @@ const MONTHLY = [
 
 const maxLeads = Math.max(...MONTHLY.map(m=>m.leads));
 const maxAppts = Math.max(...MONTHLY.map(m=>m.appts));
-const tbody = document.getElementById('monthly-tbody');
-let totalSpend=0, totalLeads=0, totalAppts=0;
+
+// Month key map: "September '25" -> "2025-09", etc.
+const MONTH_KEYS = {};
+const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 MONTHLY.forEach(m => {
-  totalSpend+=m.spend; totalLeads+=m.leads; totalAppts+=m.appts;
-  const apptRate=m.leads>0?(m.appts/m.leads*100).toFixed(0)+'%':'—';
-  const cpl=m.leads>0?'$'+(m.spend/m.leads).toFixed(2):'—';
-  const cpa=m.appts>0?'$'+(m.spend/m.appts).toFixed(2):'—';
-  const lw=Math.round(m.leads/maxLeads*80);
-  const aw=Math.round(m.appts/maxAppts*80);
-  const tr=document.createElement('tr');
-  tr.innerHTML=`<td style="font-weight:700;">${m.month}</td><td>$${m.spend.toLocaleString()}</td><td><div class="bar-cell"><div class="bar" style="width:${lw}px"></div>${m.leads}</div></td><td><div class="bar-cell"><div class="bar green" style="width:${aw}px"></div>${m.appts}</div></td><td>${apptRate}</td><td>${cpl}</td><td>${cpa}</td>`;
-  tbody.appendChild(tr);
+  const parts = m.month.replace("'","20").split(' ');
+  const mon = MONTH_NAMES.indexOf(parts[0]) + 1;
+  const yr = parts[1];
+  MONTH_KEYS[m.month] = yr + '-' + String(mon).padStart(2,'0');
 });
-const tot=document.createElement('tr');
-tot.style.fontWeight='700'; tot.style.background='#f8fafc';
-tot.innerHTML=`<td>TOTAL</td><td>$${totalSpend.toLocaleString()}</td><td>${totalLeads}</td><td>${totalAppts}</td><td>${(totalAppts/totalLeads*100).toFixed(0)}%</td><td>$${(totalSpend/totalLeads).toFixed(2)}</td><td>$${(totalSpend/totalAppts).toFixed(2)}</td>`;
-tbody.appendChild(tot);
+
+function buildMonthlyTable(wonLeads) {
+  // Aggregate won jobs by month using appt_date
+  const wonByMonth = {};
+  const revByMonth = {};
+  (wonLeads||[]).forEach(l => {
+    if (l.outcome !== 'Won') return;
+    const d = l.appt_date || '';
+    const key = d.slice(0,7); // "2026-04"
+    wonByMonth[key] = (wonByMonth[key]||0) + 1;
+    revByMonth[key] = (revByMonth[key]||0) + l.closed_value;
+  });
+
+  const tbody = document.getElementById('monthly-tbody');
+  tbody.innerHTML = '';
+  let totalSpend=0, totalLeads=0, totalAppts=0, totalWon=0, totalRev=0;
+  MONTHLY.forEach(m => {
+    totalSpend+=m.spend; totalLeads+=m.leads; totalAppts+=m.appts;
+    const mkey = MONTH_KEYS[m.month] || '';
+    const won = wonByMonth[mkey] || 0;
+    const rev = revByMonth[mkey] || 0;
+    totalWon += won; totalRev += rev;
+    const apptRate=m.leads>0?(m.appts/m.leads*100).toFixed(0)+'%':'—';
+    const lw=Math.round(m.leads/maxLeads*80);
+    const aw=Math.round(m.appts/maxAppts*80);
+    const roi = m.spend>0 ? (rev/m.spend).toFixed(1)+'x' : '—';
+    const roiColor = rev/m.spend >= 3 ? '#16a34a' : rev/m.spend >= 1 ? '#d97706' : '#dc2626';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="font-weight:700;">${m.month}</td>
+      <td>$${m.spend.toLocaleString()}</td>
+      <td><div class="bar-cell"><div class="bar" style="width:${lw}px"></div>${m.leads}</div></td>
+      <td><div class="bar-cell"><div class="bar green" style="width:${aw}px"></div>${m.appts}</div></td>
+      <td>${apptRate}</td>
+      <td style="font-weight:700;color:#1E2A5E;">${won>0?won:'—'}</td>
+      <td style="font-weight:700;color:#16a34a;">${rev>0?fmt(rev):'—'}</td>
+      <td style="font-weight:800;color:${rev>0?roiColor:'#94a3b8'};">${rev>0?roi:'—'}</td>`;
+    tbody.appendChild(tr);
+  });
+  const tot=document.createElement('tr');
+  tot.style.fontWeight='800'; tot.style.background='#f0fdf4';
+  const totalRoi = totalSpend>0?(totalRev/totalSpend).toFixed(1)+'x':'—';
+  tot.innerHTML=`<td>TOTAL</td><td>$${totalSpend.toLocaleString()}</td><td>${totalLeads}</td><td>${totalAppts}</td><td>${(totalAppts/totalLeads*100).toFixed(0)}%</td><td style="color:#1E2A5E;">${totalWon}</td><td style="color:#16a34a;">${fmt(totalRev)}</td><td style="color:#16a34a;">${totalRoi}</td>`;
+  tbody.appendChild(tot);
+}
+
+buildMonthlyTable([]); // Build with empty won data initially
 
 const BADGE={'Won':'#16a34a','Scheduled':'#1E2A5E','In Progress':'#0891b2','Canceled':'#dc2626','Needs Scheduling':'#d97706'};
 let allLeads=[], activeDays=0, liveData=null;
@@ -318,6 +359,7 @@ fetch('https://3-18-36-246.sslip.io/ll-report')
     document.getElementById('updated').textContent = 'HCP data last updated: '+(d.updated||'');
     document.getElementById('loading').style.display='none';
     document.getElementById('table-wrap').style.display='block';
+    buildMonthlyTable(allLeads); // Rebuild with real won/revenue data
     renderLeads(allLeads, 0);
     // If drill panel was open waiting for data, refresh it
     if (activeCard === 'won' || activeCard === 'revenue') drillDown(activeCard);
