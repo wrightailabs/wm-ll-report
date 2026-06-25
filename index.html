@@ -89,7 +89,7 @@
   <div class="funnel">
     <div class="funnel-card" id="card-leads" onclick="drillDown('leads')">
       <div class="icon">📢</div>
-      <div class="value">1,564</div>
+      <div class="value">790</div>
       <div class="label">Total Leads</div>
       <div class="pct">Qualified leads since Sept 2025</div>
       <div class="drill-hint">▼ Tap to drill down</div>
@@ -275,7 +275,7 @@ function drillDown(type) {
   panel.scrollIntoView({behavior:'smooth', block:'nearest'});
 
   if (type === 'leads') {
-    title.textContent = '1,564 Total Leads — Monthly Breakdown';
+    title.textContent = '790 Total Leads — Monthly Breakdown';
     let rows = MONTHLY.map(m => `<tr><td style="font-weight:700;">${m.month}</td><td>${m.leads}</td><td>$${(m.spend/m.leads).toFixed(2)}</td></tr>`).join('');
     body.innerHTML = `<table><thead><tr><th>Month</th><th>Leads</th><th>Cost / Lead</th></tr></thead><tbody>${rows}</tbody></table>`;
   } else if (type === 'appts') {
