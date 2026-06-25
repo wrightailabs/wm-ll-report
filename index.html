@@ -152,6 +152,7 @@
     <button class="filter-btn" onclick="setFilter(30,this)">Last 30 Days</button>
     <button class="filter-btn" onclick="setFilter(90,this)">Last 90 Days</button>
     <button class="filter-btn active" onclick="setFilter(0,this)">All Time</button>
+    <button class="filter-btn" onclick="downloadCSV()" style="margin-left:auto;background:#16a34a;color:#fff;border-color:#16a34a;">⬇ Download CSV</button>
   </div>
   <div id="filter-totals" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 18px;margin-bottom:12px;display:none;">
     <span style="font-size:13px;color:#64748b;font-weight:600;">Showing: </span>
@@ -322,6 +323,35 @@ function setFilter(days, btn) {
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderLeads(allLeads, days);
+}
+
+function downloadCSV() {
+  const filtered = filterLeads(allLeads, activeDays).filter(l => l.outcome === 'Won');
+  const label = activeDays ? `Last ${activeDays} Days` : 'All Time';
+  const rows = [['Name','Phone','Outcome','Appointment Date','Closed Value','Match Confidence','Signals']];
+  filtered.forEach(l => {
+    const sigs = (l.signals||[]).join('; ');
+    const sigCount = (l.signals||[]).length;
+    const conf = sigCount >= 3 ? 'High' : sigCount === 2 ? 'Medium' : 'Low';
+    rows.push([
+      '"' + (l.name||'').replace(/"/g,'""') + '"',
+      '"' + (l.phone||'') + '"',
+      l.outcome||'',
+      l.appt_date||'',
+      l.closed_value > 0 ? l.closed_value.toFixed(2) : '0.00',
+      conf,
+      '"' + sigs + '"'
+    ]);
+  });
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const today = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `LocalLeap_WonJobs_${label.replace(/ /g,'_')}_${today}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function filterLeads(leads, days) {
