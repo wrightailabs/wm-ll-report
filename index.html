@@ -275,7 +275,7 @@ function drillDown(type) {
   panel.scrollIntoView({behavior:'smooth', block:'nearest'});
 
   if (type === 'leads') {
-    title.textContent = (totalLeads||790).toLocaleString() + ' Total Leads — Monthly Breakdown';
+    title.textContent = (totalLeads||818).toLocaleString() + ' Total Leads — Monthly Breakdown';
     let rows = MONTHLY.map(m => `<tr><td style="font-weight:700;">${m.month}</td><td>${m.leads}</td><td>$${(m.spend/m.leads).toFixed(2)}</td></tr>`).join('');
     body.innerHTML = `<table><thead><tr><th>Month</th><th>Leads</th><th>Cost / Lead</th></tr></thead><tbody>${rows}</tbody></table>`;
   } else if (type === 'appts') {
@@ -394,7 +394,7 @@ fetch('https://3-18-36-246.sslip.io/ll-report')
     if(d.status==='building'){document.getElementById('loading').textContent='Report is being built — check back in 60 seconds.';return;}
     liveData = d;
     allLeads = d.leads||[];
-    const totalLeads = d.total_leads || 790;
+    const totalLeads = d.total_leads || 818;
     const totalAppts = d.scheduled || 290;
     document.getElementById('stat-total-leads').textContent = totalLeads.toLocaleString();
     document.getElementById('stat-total-appts').textContent = totalAppts.toLocaleString();
