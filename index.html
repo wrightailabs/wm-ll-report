@@ -89,16 +89,16 @@
   <div class="funnel">
     <div class="funnel-card" id="card-leads" onclick="drillDown('leads')">
       <div class="icon">📢</div>
-      <div class="value">790</div>
+      <div class="value" id="stat-total-leads">—</div>
       <div class="label">Total Leads</div>
       <div class="pct">Qualified leads since Sept 2025</div>
       <div class="drill-hint">▼ Tap to drill down</div>
     </div>
     <div class="funnel-card" id="card-appts" onclick="drillDown('appts')">
       <div class="icon">📅</div>
-      <div class="value">290</div>
+      <div class="value" id="stat-total-appts">—</div>
       <div class="label">Appointments Booked</div>
-      <div class="pct">37% appointment rate</div>
+      <div class="pct" id="stat-appt-rate">Loading...</div>
       <div class="drill-hint">▼ Tap to drill down</div>
     </div>
     <div class="funnel-card" id="card-won" onclick="drillDown('won')">
@@ -275,11 +275,11 @@ function drillDown(type) {
   panel.scrollIntoView({behavior:'smooth', block:'nearest'});
 
   if (type === 'leads') {
-    title.textContent = '790 Total Leads — Monthly Breakdown';
+    title.textContent = (totalLeads||790).toLocaleString() + ' Total Leads — Monthly Breakdown';
     let rows = MONTHLY.map(m => `<tr><td style="font-weight:700;">${m.month}</td><td>${m.leads}</td><td>$${(m.spend/m.leads).toFixed(2)}</td></tr>`).join('');
     body.innerHTML = `<table><thead><tr><th>Month</th><th>Leads</th><th>Cost / Lead</th></tr></thead><tbody>${rows}</tbody></table>`;
   } else if (type === 'appts') {
-    title.textContent = '290 Appointments — Monthly Breakdown';
+    title.textContent = (totalAppts||290).toLocaleString() + ' Appointments — Monthly Breakdown';
     let rows = MONTHLY.map(m => `<tr><td style="font-weight:700;">${m.month}</td><td>${m.appts}</td><td>${(m.appts/m.leads*100).toFixed(0)}%</td><td>$${(m.spend/m.appts).toFixed(2)}</td></tr>`).join('');
     body.innerHTML = `<table><thead><tr><th>Month</th><th>Appointments</th><th>Appt Rate</th><th>Cost / Appt</th></tr></thead><tbody>${rows}</tbody></table>`;
   } else if (type === 'won' || type === 'revenue') {
@@ -394,8 +394,13 @@ fetch('https://3-18-36-246.sslip.io/ll-report')
     if(d.status==='building'){document.getElementById('loading').textContent='Report is being built — check back in 60 seconds.';return;}
     liveData = d;
     allLeads = d.leads||[];
+    const totalLeads = d.total_leads || 790;
+    const totalAppts = d.scheduled || 290;
+    document.getElementById('stat-total-leads').textContent = totalLeads.toLocaleString();
+    document.getElementById('stat-total-appts').textContent = totalAppts.toLocaleString();
+    document.getElementById('stat-appt-rate').textContent = totalLeads ? Math.round(totalAppts/totalLeads*100)+'% appointment rate' : '';
     document.getElementById('stat-won').textContent = d.won||'—';
-    document.getElementById('stat-won-pct').textContent = d.won ? Math.round(d.won/290*100)+'% of appointments' : '';
+    document.getElementById('stat-won-pct').textContent = d.won ? Math.round(d.won/totalAppts*100)+'% of appointments' : '';
     document.getElementById('stat-revenue').textContent = d.total_revenue ? fmt(d.total_revenue) : '—';
     document.getElementById('updated').textContent = 'HCP data last updated: '+(d.updated||'');
     document.getElementById('loading').style.display='none';
